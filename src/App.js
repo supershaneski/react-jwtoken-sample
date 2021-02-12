@@ -1,25 +1,35 @@
-import logo from './logo.svg';
-import './App.css';
+import React from 'react';
+import { connect }  from 'react-redux';
+import { BrowserRouter as Router } from "react-router-dom";
+import { setUserParam } from './redux/';
+import ErrorBoundary from './components/ErrorBoundary';
+import Loader from './components/Loader';
+import Routes from './Routes';
 
 function App() {
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
-  );
+    <ErrorBoundary>
+      <React.Suspense fallback={<Loader />}>
+        <Router basename={process.env.REACT_APP_BASENAME}>
+          <Routes />
+        </Router>
+      </React.Suspense>
+    </ErrorBoundary>
+  )
 }
 
-export default App;
+const mapStateToProps = (state) => {
+  return {
+    user: state.user,
+  }
+}
+
+const mapDispatchToProps = (dispatch) => {
+  return {
+    onUserUpdate: (data) => {
+      dispatch(setUserParam(data));
+    }
+  }
+}
+
+export default connect(mapStateToProps, mapDispatchToProps)(App);
