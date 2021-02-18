@@ -6,6 +6,45 @@
     justify-content: center;
     align-items: center;
 }
+.reload {
+    position: absolute;
+    right: 0px;
+    top: 0px;
+    padding: 16px;
+}
+.reload span {
+    font-size: 20px !important;
+    cursor: pointer;
+}
+
+.loader {
+    position: relative;
+}
+.cycle {
+    position: relative;
+    animation: ani-rotate 0.5s 0s infinite ease;
+    transform: rotate(0deg);
+}
+.loader span {
+    font-size: 5rem !important;
+    color: #f0a;
+    animation: ani-loader 2s 1s infinite ease;
+}
+
+@keyframes ani-rotate {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+@keyframes ani-loader {
+    0% { color: #f0a; }
+    15% { color: #af0; }
+    35% { color: #0af; }
+    60% { color: #fa0; }
+    75% { color: #0fa; }
+    100% { color: #f0a; }
+}
+
 .error {
     color: #f03;
 }
