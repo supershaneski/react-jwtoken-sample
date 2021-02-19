@@ -14,8 +14,8 @@ The client app will now use this token in every subsequent requests to the remot
 # Server scripts
 
 I included simple PHP scripts to handle the server-side operation in this project.
-Ideally, it would be better to create a Node.JS server app for this.
-Maybe I will do it next time.
+Ideally, it would be better to create a Node.JS server app.
+Maybe I will make one next time.
 
 The JWT is created server side using jwtoken.class.php. 
 The class is initialized by the secret key which will be used to sign the token.
@@ -23,6 +23,11 @@ The payload is automatically appended with expiration date if the expire variabl
 
 The token example is timed to expire after 1 hour and the app will handle this case and automatically re-login the user to get fresh token.
 
+# Change log
+
+I added a simple refresh token handler to when the original request send back expired token status.
+The response will be intercepted before sending back to the original caller. 
+I am using fetch() so it is kinda primitive but other library like [axios](https://github.com/axios/axios) has built in mechanism for interceptors.
 
 ## React App Installation
 Clone repository and run

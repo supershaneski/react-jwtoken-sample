@@ -75,12 +75,18 @@ class Page extends React.Component {
         console.log("keys...", d1.join('-'));
         */
 
+        console.log("now: " + Date.now());
+
+        console.log("fetch data...");
+
         getData({ token: this.props.user.token }).then(data => {
             
+            console.log("data", data);
+
             const status = typeof data.status !== "undefined" ? parseInt(data.status) : 0;
             if(status === 200) {
 
-                console.log("data received...")
+                console.log((new Date()).toLocaleTimeString() + " data received...")
 
                 this.setState({
                     items: data.items,

@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Sample API end point that process a request with a JWT authorization
+ * Handles refresh token request
  */
 require(dirname(__FILE__).'/config.php');
 require(dirname(__FILE__).'/jwtoken.class.php');
@@ -58,24 +58,27 @@ if(strlen($jwtoken) === 0)
 $jwt = new jwtoken(SECRET_KEY);
 $ret = $jwt->verify($jwtoken);
     
-if($ret === 1){
+if($ret === 1){ // invalid token
 
     bad_request();
     die();
 
-} elseif($ret === 2) {
+} elseif($ret === 2) { // expired token
 
-    set_error_response(401, "Token has expired.");
-    exit();
+    // generate new token
+    $user_id = random_bytes(9);
+    $user_id = bin2hex($user_id);
+
+    $jwtoken = $jwt->create(array(
+        'sub' => $user_id,
+    ), 1);
+
+    set_response(array("status" => 200, "token" => $jwtoken));
+
+} else { // token still valid, send back same token
+
+    set_response(array("status" => 200, "token" => $jwtoken));
 
 }
-
-/** Dummy response data */
-$items = array();
-for($i = 0; $i < 30; $i++) {
-    $items[] = array("value" => $i);
-}
-
-set_response(array("status" => 200, "items" => $items));
 
 ?>

@@ -10,18 +10,12 @@ const header = {
     'Content-Type': 'application/json',
 }
 
-const request = {
-    url: '',
-    method: 'POST',
-    headers: null,
-    payload: null,
-}
+const config = server_config.find(item => item.key === process.env.NODE_ENV);
+const base_url = process.env.NODE_ENV === "production" ? `https://${config.host}` : `http://${config.host}:${config.port}`;
 
-export async function submitLogin({ login, password }) 
-{
+export async function submitLogin({ login, password }) {
     
-    const config = server_config.find(item => item.key === process.env.NODE_ENV);
-    const url = process.env.NODE_ENV === "production" ? `https://${config.host}/test/login.php` : `http://${config.host}:${config.port}/test/login`
+    const url = `${base_url}/login.php`;
     
     const my_header = {
         'Accept': 'application/json',
@@ -44,19 +38,14 @@ export async function submitLogin({ login, password })
 
 export async function getData({ token })
 {
-    const config = server_config.find(item => item.key === process.env.NODE_ENV);
-    const url = process.env.NODE_ENV === "production" ? `https://${config.host}/test/list.php` : `http://${config.host}:${config.port}/test/list`
     
+    const url = `${base_url}/list.php`;
+
     const my_header = {
         'Accept': 'application/json',
         'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
         'Authorization': 'Bearer ' + token,
     }
-
-    // save
-    request.url = url;
-    request.method = 'GET';
-    request.headers = process.env.NODE_ENV === "production" ? my_header : header;
 
     let response = await fetch(url, {
         method: 'GET',
@@ -65,32 +54,51 @@ export async function getData({ token })
 
     let result = await response.json();
 
-    //console.log("data...", result);
-
+    // intercept response from original request
+    // to check if server sends an expired token status
     const status = typeof result.status !== "undefined" ? parseInt(result.status) : 0;
     if(status === 401) {
+        
+        // if the token is expired, send a refresh token request
 
-        console.log("refresh token...");
+        const url1 = `${base_url}/refresh.php`;
 
-        // refresh token
-        //return result;
-
-        const url1 = `http://${config.host}:${config.port}/test/refresh/`;
-        let responseT = await fetch(url1);
+        let responseT = await fetch(url1, {
+            method: 'GET',
+            headers: process.env.NODE_ENV === "production" ? my_header : header,
+        })
         let resultT = await responseT.json();
 
         const statusT = typeof resultT.status !== "undefined" ? parseInt(resultT.status) : 0;
-        if(statusT === 401) {
+        if(statusT !== 200) {
 
-            console.log("...expired");
+            // if refresh token failed, send back the response
 
             return resultT;
             
         } else {
 
-            console.log("...okay");
+            const new_token = typeof resultT.token !== "undefined" ? parseInt(resultT.token) : '';
 
-            response = await fetch(url);
+            // if token is empty, send back original response
+            if(!new_token) {
+
+                return result;
+
+            }
+
+            const new_header = {
+                'Accept': 'application/json',
+                'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
+                'Authorization': 'Bearer ' + new_token,
+            }
+
+            // prepare the header with the new token and send request again
+            response = await fetch(url1, {
+                method: 'GET',
+                headers: process.env.NODE_ENV === "production" ? new_header : header,
+            })
+
             result = await response.json();
             return result;
 

@@ -1,11 +1,12 @@
 <?php
 
-require_once(dirname(__FILE__).'/jwtoken.class.php');
+/**
+ * Handles login request
+ * takes client apikey to authenticate the user and sends back a JWT
+ */
 
-define(API_KEY, 'MY-API-KEY');
-define(SECRET_KEY, 'MY-SECRET-KEY');
-define(USER_LOGIN, 'MY-LOGIN');
-define(USER_PASSWD, 'MY-PASSWD');
+require(dirname(__FILE__).'/config.php');
+require(dirname(__FILE__).'/jwtoken.class.php');
 
 function bad_request() 
 {
